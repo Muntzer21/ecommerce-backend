@@ -79,6 +79,29 @@ export class UserService {
     return { accessToken};
   }
 
+  async login(id : number) {
+    const user = await this.userReposirty.findOne({
+      where: { user_id : id},
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const accessToken = await this.generateJwt({
+      id: user.user_id,
+      email: user.email,
+      role: user.roles,
+    });
+
+    return { accessToken };
+  }
+
+  async create(createUserDto: CreateUserDto) {
+    const user = this.userReposirty.create(createUserDto);
+    return await this.userReposirty.save(user);
+  }
+
   findAll() {
     return this.userReposirty.find();
   }
@@ -91,6 +114,16 @@ export class UserService {
     if (!user) {
       throw new BadRequestException('User not found');
     }
+    return user;
+  }
+
+  async findByEmail(email: string) {
+    const user = await this.userReposirty.findOne({
+      where: { email },
+    });
+    // if (!user) {
+    //   throw new BadRequestException('User not found');
+    // }
     return user;
   }
 
