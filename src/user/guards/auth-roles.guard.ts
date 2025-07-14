@@ -42,6 +42,7 @@ export class AuthRolesGuard implements CanActivate {
       });
 
       const user = await this.userService.findOne(payload.id);
+      
       if (!user) throw new BadRequestException('the user is not found');
 
       if (roles.includes(user.roles)) {

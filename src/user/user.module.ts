@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), JwtModule.registerAsync({
+  imports: [RedisModule,TypeOrmModule.forFeature([User]), JwtModule.registerAsync({
     inject: [ConfigService],
     useFactory: (config: ConfigService) => {
       return {

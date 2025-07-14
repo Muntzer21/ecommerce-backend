@@ -9,11 +9,13 @@ import * as bcrypt from 'bcrypt';
 import { SignInDto } from './dto/sign-in.dto';
 import { JwtService } from '@nestjs/jwt';
 import { access } from 'fs';
+import { RedisService } from '../redis/redis.service';
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly userReposirty: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly redisService: RedisService,
     // private readonly emailService: EmailService,
   ) {}
 
@@ -31,8 +33,7 @@ export class UserService {
       throw new Error('User already exists');
     }
 
-    const slat = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(signupUserDto.password, slat);
+    const hashedPassword = await this.hashPassword(signupUserDto.password);
     signupUserDto.password = hashedPassword;
 
     let newUser = this.userReposirty.create(signupUserDto);
@@ -107,14 +108,28 @@ export class UserService {
   }
 
   async findOne(id: number) {
-    const user =await this.userReposirty.findOne({
-      where: { user_id: id },
+    const userCache  = await this.redisService.client.get(`user:${id}`);
+    if (userCache) {
+      return JSON.parse(userCache); // Return cached user if exists
+    } else {
+      const user = await this.userReposirty.findOne({
+        where: { user_id: id },
+      });
 
-    });
-    if (!user) {
-      throw new BadRequestException('User not found');
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+      await this.redisService.client.set(
+        `user:${id}`,
+        JSON.stringify(user),
+        'EX',
+        60,
+      ); // Cache for 60 seconds
+      return user;
     }
-    return user;
+    
+
+    
   }
 
   async findByEmail(email: string) {
@@ -127,16 +142,29 @@ export class UserService {
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.findOne(id);
+
+    user.username = updateUserDto.username ?? user.username;
+    if (updateUserDto.password) {
+      user.password = await this.hashPassword(updateUserDto.password);
+    }
+
+    return await this.userReposirty.save(user);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    await this.userReposirty.delete(id);
+    return { message: 'User deleted successfully' };
   }
 
-  private async generateJwt(payload: any) {
+   async generateJwt(payload: any) {
     const token = await this.jwtService.signAsync(payload);
     return token;
+  }
+
+  private async hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt(10);
+    return await bcrypt.hash(password, salt);
   }
 }

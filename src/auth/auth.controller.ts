@@ -27,7 +27,11 @@ export class AuthController {
     // console.log(req.user);
     // console.log(req.user.user_id);
     // console.log(res);
-    const  access_token = await this.userService.login(req.user.user_id); // Get the access token from your authService
+    const  access_token = await this.userService.generateJwt({
+      user_id: req.user.user_id,
+      email: req.user.email,
+      role: req.user.roles,
+    }); // Get the access token from your authService
 
     // Determine your frontend URL dynamically or from config
     const frontendUrl = 'http://localhost:3000/api/v1/auth/home'; // Example: Assuming your frontend runs on port 4200 (Angular) or 3000 (React/Next.js)
@@ -44,7 +48,7 @@ export class AuthController {
 
   @Get('home')
   findAll() {
-    return 'hi mony';
+    return 'hi hasony';
     return this.authService.findAll();
   }
 

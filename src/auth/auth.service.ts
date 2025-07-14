@@ -10,12 +10,11 @@ constructor(private readonly userService: UserService) {}
 
   async validateGoogleUser(googleUser: SignUpDto) {
     const user = await this.userService.findByEmail(googleUser.email);
-    console.log(googleUser.email);
-    console.log(user);
+ 
     if (user) {
-      return user;
+      return user; // User already exists, return the existing user
     }
-    console.log(user);
+ 
     
    return await this.userService.create(googleUser);
     // return this,userService.findByEmail(googleUser.email);

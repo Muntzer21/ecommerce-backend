@@ -25,7 +25,7 @@ export class UserController {
   }
 
   @Get('current-user')
-    @UseGuards(Authen)
+  @UseGuards(Authen)
   current(@CurrentUser() user) {
     console.log('Current User:', user);
     return this.userService.findOne(user.id);
@@ -38,17 +38,23 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Roles(UserType.ADMIN)
+  @UseGuards(AuthRolesGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Patch()
+  @Roles(UserType.ADMIN, UserType.USER)
+  @UseGuards(AuthRolesGuard)
+  update(@CurrentUser() currentUser, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(currentUser.id, updateUserDto);
   }
 
   @Delete(':id')
+  @Roles(UserType.ADMIN)
+  @UseGuards(AuthRolesGuard)
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }

@@ -14,14 +14,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
   async validate(accessToken: string, refreshToken: string, profile: any) {
-    // const user = await this.authService.validateGoogleUser({
-    //   email: profile.emails[0].value,
-    //   username: profile.name.givenName,
-    //   password: "",
-    // });
+    const user = await this.authService.validateGoogleUser({
+      email: profile.emails[0].value,
+      username: profile.name.givenName,
+      password: "",
+    });
+    return user;
     // done(null, user);
-    console.log('Google Profile:', profile);
-    return profile;
-    // done(null, profile);
+    
+    // done(null, user);
   }
 }
