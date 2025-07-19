@@ -12,12 +12,12 @@ export class ProductService {
           @InjectRepository(Product) private readonly productRepository: Repository<Product>,
    private readonly redisService : RedisService
   ) { }
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto,user_id : number) {
     const product = await this.productRepository.findOne({ where: { title: createProductDto.title, description: createProductDto.description, category: { category_id: createProductDto.category_id } } });
    if (product) {
     throw new BadRequestException('this product already exists');
    }
-   let newProduct = this.productRepository.create({...createProductDto, category: { category_id: createProductDto.category_id } });
+   let newProduct = this.productRepository.create({...createProductDto, category: { category_id: createProductDto.category_id },added_by:user_id });
   return newProduct = await this.productRepository.save(newProduct);
   }
 

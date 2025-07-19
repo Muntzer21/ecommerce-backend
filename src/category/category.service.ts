@@ -13,13 +13,13 @@ export class CategoryService {
 private readonly redisService : RedisService
   ) { }
   
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(createCategoryDto: CreateCategoryDto,user_id : number) {
 
     const category = await this.categoryRepository.findOne({where: { title: createCategoryDto.title , description: createCategoryDto.description}});
     if (category) {
       throw new BadRequestException('Category its already exists');
     }
-    const newCategory = this.categoryRepository.create(createCategoryDto);
+    const newCategory = this.categoryRepository.create({...createCategoryDto,added_by:user_id});
     return await this.categoryRepository.save(newCategory);
   }
 

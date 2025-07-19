@@ -19,18 +19,21 @@ export class Product {
   @Column()
   stock: number;
 
+  @Column({ nullable: true })
+  added_by: number;
+
   @CreateDateColumn()
   createAt: Timestamp;
 
   @UpdateDateColumn()
-    updateAt: Timestamp;
-    
-    @ManyToOne(() => Category, (category) => category.products)
-    @JoinColumn({ name: 'category_id' })
-    category: Category;
+  updateAt: Timestamp;
 
-    @OneToMany(() => Review, (review) => review.product)
-    reviews: Review[];
+  @ManyToOne(() => Category, (category) => category.products)
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
+
+  @OneToMany(() => Review, (review) => review.product)
+  reviews: Review[];
 
   // Uncomment and adjust relationships as needed
   // @ManyToOne(() => Category, (category) => category.products)

@@ -10,6 +10,8 @@ import { RedisModule } from './redis/redis.module';
 import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
 import { ReviewModule } from './review/review.module';
+import { OrderModule } from './order/order.module';
+import { ShippingModule } from './shipping/shipping.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { ReviewModule } from './review/review.module';
     CategoryModule,
     ProductModule,
     ReviewModule,
+    OrderModule,
+    ShippingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

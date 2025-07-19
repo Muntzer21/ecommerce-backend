@@ -5,6 +5,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Roles } from '../user/decorators/user-role.decorator';
 import { UserType } from '../utils/user-type';
 import { AuthRolesGuard } from '../user/guards/auth-roles.guard';
+import { CurrentUser } from 'src/user/decorators/current-user.decorator';
 
 @Controller('category')
 export class CategoryController {
@@ -13,8 +14,8 @@ export class CategoryController {
   @Roles(UserType.ADMIN)
   @UseGuards(AuthRolesGuard)
   @Post('add-category')
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoryService.create(createCategoryDto);
+  create(@Body() createCategoryDto: CreateCategoryDto,@CurrentUser() user) {
+    return this.categoryService.create(createCategoryDto,user.id);
   }
 
   @Roles(UserType.ADMIN)

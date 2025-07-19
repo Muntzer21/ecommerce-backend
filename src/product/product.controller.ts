@@ -5,6 +5,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { AuthRolesGuard } from '../user/guards/auth-roles.guard';
 import { Roles } from '../user/decorators/user-role.decorator';
 import { UserType } from '../utils/user-type';
+import { CurrentUser } from 'src/user/decorators/current-user.decorator';
 
 @Controller('product')
 export class ProductController {
@@ -13,8 +14,8 @@ export class ProductController {
   @Roles(UserType.ADMIN)
   @UseGuards(AuthRolesGuard)
   @Post('add-product')
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  create(@Body() createProductDto: CreateProductDto, @CurrentUser() user) {
+    return this.productService.create(createProductDto,user.id);
   }
   @Roles(UserType.ADMIN, UserType.USER)
   @UseGuards(AuthRolesGuard)

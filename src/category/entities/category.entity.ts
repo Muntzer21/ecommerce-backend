@@ -9,6 +9,8 @@ export class Category {
   title: string;
   @Column()
   description: string;
+  @Column({nullable:true})
+  added_by:number
   @CreateDateColumn()
   createAt: Timestamp;
   @UpdateDateColumn()
