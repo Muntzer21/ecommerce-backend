@@ -5,6 +5,8 @@ import { Category } from 'src/category/entities/category.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { Review } from 'src/review/entities/review.entity';
 import { Order } from 'src/order/entities/order.entity';
+import { Shipping } from 'src/order/entities/shipping.entity';
+import { OrdersProducts } from 'src/order/entities/order.products.entity';
 
 
 config({
@@ -18,7 +20,7 @@ export const dataSourceOptions: DataSourceOptions = {
   username: process.env.DB_USERNAME ,
   password: process.env.DB_PASSWORD ,
   database: process.env.DB_DATABASE ,
-  entities: [User, Category, Product, Review,Order],
+  entities: [User, Category, Product, Review,Order,Shipping,OrdersProducts],
   synchronize: true, // only in development environment
   migrations: ['dist/db/migrations/*{.js,.ts}'],
 };

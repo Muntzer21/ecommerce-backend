@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
 import { RedisService } from 'src/redis/redis.service';
+import { OrderStatus } from 'src/order/enums/order-status';
 
 @Injectable()
 export class ProductService {
@@ -56,6 +57,18 @@ export class ProductService {
     product.price = updateProductDto.price ?? product.price;
     product.stock = updateProductDto.stock ?? product.stock;
     return this.productRepository.save(product);
+  }
+
+  async stockUpdate(id: number, stock: number, status: string) {
+    let product = await this.findOne(id);
+    if (status===OrderStatus.DELIVERED) {
+      product.stock -= stock;
+    } else {
+      product.stock += stock;
+      
+    }
+    product = await this.productRepository.save(product);
+    return product;
   }
 
   

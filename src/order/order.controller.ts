@@ -5,16 +5,20 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { Roles } from '../user/decorators/user-role.decorator';
 import { UserType } from '../utils/user-type';
 import { AuthRolesGuard } from '../user/guards/auth-roles.guard';
+import { CurrentUser } from 'src/user/decorators/current-user.decorator';
+import { UpdateOrderSatus } from './dto/update-order-status.dto';
 
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-   @Roles(UserType.ADMIN, UserType.USER)
-    @UseGuards(AuthRolesGuard)
-  @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+  @Roles(UserType.ADMIN, UserType.USER)
+  @UseGuards(AuthRolesGuard)
+  @Post('create-order')
+  create(@Body() createOrderDto: CreateOrderDto, @CurrentUser() user) {
+    //  return 'its working ...';
+
+    return this.orderService.create(createOrderDto, user.id);
   }
 
   @Get()
@@ -27,9 +31,26 @@ export class OrderController {
     return this.orderService.findOne(+id);
   }
 
+  @Roles(UserType.ADMIN)
+  @UseGuards(AuthRolesGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateOrderDto: UpdateOrderSatus,
+    @CurrentUser() currentUser,
+  ) {
+    return this.orderService.update(+id, updateOrderDto, currentUser.id);
+  }
+
+  @Roles(UserType.ADMIN)
+  @UseGuards(AuthRolesGuard)
+  @Patch('cancel/:id')
+  cancelled(
+    @Param('id') id: string,
+    @CurrentUser() currentUser,
+  ) {
+    return this.orderService.cancelled(+id, currentUser.id);
+    
   }
 
   @Delete(':id')

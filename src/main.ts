@@ -12,6 +12,10 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      transform: true, // <--- THIS IS CRUCIAL
+      transformOptions: {
+        enableImplicitConversion: true, // Good to have for converting strings to numbers
+      },
     }),
   );
    const config = new DocumentBuilder()

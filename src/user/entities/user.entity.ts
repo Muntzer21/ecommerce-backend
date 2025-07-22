@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Timestamp, UpdateDateColumn } from "typeorm";
 import { UserType } from "../../utils/user-type";
 import { Review } from "src/review/entities/review.entity";
+import { Order } from "src/order/entities/order.entity";
 
 @Entity('users')
 export class User {
@@ -21,4 +22,7 @@ export class User {
 
   @OneToMany(() => Review, (review) => review.user)
   reviews: Review[];
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[]
 }

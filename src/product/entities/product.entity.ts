@@ -1,3 +1,4 @@
+import { OrdersProducts } from "src/order/entities/order.products.entity";
 import { Category } from "../../category/entities/category.entity";
 import { Review } from "../../review/entities/review.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, Timestamp, UpdateDateColumn } from "typeorm";
@@ -34,6 +35,9 @@ export class Product {
 
   @OneToMany(() => Review, (review) => review.product)
   reviews: Review[];
+
+  @OneToMany(() => OrdersProducts, (op) => op.product) 
+  order_products : OrdersProducts[]
 
   // Uncomment and adjust relationships as needed
   // @ManyToOne(() => Category, (category) => category.products)
