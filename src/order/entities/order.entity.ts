@@ -18,6 +18,8 @@ export class Order {
   shippedAt: Date;
   @Column({ nullable: true })
   deliveredAt: Date;
+  @Column({nullable:true})
+  added_by : number
   @ManyToOne(() => User, (user) => user.orders)
   user: User;
 

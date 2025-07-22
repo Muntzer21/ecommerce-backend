@@ -13,6 +13,12 @@ export class CategoryService {
 private readonly redisService : RedisService
   ) { }
   
+  /**
+   * create new category
+   * @param createCategoryDto to add new category in DB
+   * @param user_id user that add this category
+   * @returns new category in DB
+   */
   async create(createCategoryDto: CreateCategoryDto,user_id : number) {
 
     const category = await this.categoryRepository.findOne({where: { title: createCategoryDto.title , description: createCategoryDto.description}});
@@ -23,10 +29,19 @@ private readonly redisService : RedisService
     return await this.categoryRepository.save(newCategory);
   }
 
+  /**
+   * get all gategory
+   * @returns category list
+   */
   findAll() {
     return this.categoryRepository.find();
   }
 
+  /**
+   * get one gategory
+   * @param id category id
+   * @returns gategory from DB
+   */
   async findOne(id: number) {
     const categoryCache = await this.redisService.client.get(`category:${id}`);
     if (categoryCache) {
@@ -47,6 +62,12 @@ private readonly redisService : RedisService
     return category;
   }
 
+  /**
+   * update category
+   * @param id category id
+   * @param updateCategoryDto update category info
+   * @returns update category in DB
+   */
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
     const category = await this.findOne(id);
 

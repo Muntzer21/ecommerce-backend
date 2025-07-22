@@ -49,6 +49,11 @@ export class UserService {
     return { accessToken };
   }
 
+  /**
+   * to sign in auser
+   * @param signupUserDto body of the request
+   * @returns access token
+   */
   async signIn(signInDto: SignInDto) {
     const user = await this.userReposirty
       .createQueryBuilder('users')
@@ -76,13 +81,17 @@ export class UserService {
       role: user.roles,
     });
 
-
-    return { accessToken};
+    return { accessToken };
   }
 
-  async login(id : number) {
+  /**
+   * login for google users
+   * @param id user id
+   * @returns access token
+   */
+  async login(id: number) {
     const user = await this.userReposirty.findOne({
-      where: { user_id : id},
+      where: { user_id: id },
     });
 
     if (!user) {
@@ -98,17 +107,31 @@ export class UserService {
     return { accessToken };
   }
 
+  /**
+   * create new user from google
+   * @param createUserDto body of user from google
+   * @returns add user info in DB
+   */
   async create(createUserDto: CreateUserDto) {
     const user = this.userReposirty.create(createUserDto);
     return await this.userReposirty.save(user);
   }
 
+  /**
+   * get users
+   * @returns all users
+   */
   findAll() {
     return this.userReposirty.find();
   }
 
+  /**
+   * get one user
+   * @param id user id
+   * @returns get one user from DB
+   */
   async findOne(id: number) {
-    const userCache  = await this.redisService.client.get(`user:${id}`);
+    const userCache = await this.redisService.client.get(`user:${id}`);
     if (userCache) {
       return JSON.parse(userCache); // Return cached user if exists
     } else {
@@ -127,11 +150,13 @@ export class UserService {
       ); // Cache for 60 seconds
       return user;
     }
-    
-
-    
   }
 
+  /**
+   * get user by email
+   * @param email email user
+   * @returns get one user
+   */
   async findByEmail(email: string) {
     const user = await this.userReposirty.findOne({
       where: { email },
@@ -142,6 +167,12 @@ export class UserService {
     return user;
   }
 
+  /**
+   * update user info
+   * @param id user id
+   * @param updateUserDto user body for update
+   * @returns update user info
+   */
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
 
@@ -153,16 +184,31 @@ export class UserService {
     return await this.userReposirty.save(user);
   }
 
+  /**
+   * delete user by user id
+   * @param id user id
+   * @returns delete user form DB
+   */
   async remove(id: number) {
     await this.userReposirty.delete(id);
     return { message: 'User deleted successfully' };
   }
 
-   async generateJwt(payload: any) {
+  /**
+   * genete token for user
+   * @param payload paylod info for put it in token
+   * @returns access toekn
+   */
+  async generateJwt(payload: any) {
     const token = await this.jwtService.signAsync(payload);
     return token;
   }
 
+  /**
+   * hashed password
+   * @param password password to hash
+   * @returns hashed password
+   */
   private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(password, salt);

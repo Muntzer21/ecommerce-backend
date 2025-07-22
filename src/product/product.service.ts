@@ -13,6 +13,12 @@ export class ProductService {
           @InjectRepository(Product) private readonly productRepository: Repository<Product>,
    private readonly redisService : RedisService
   ) { }
+  /**
+   * create new product in DB
+   * @param createProductDto product body to create in DB
+   * @param user_id who user that add product
+   * @returns new product in DB
+   */
   async create(createProductDto: CreateProductDto,user_id : number) {
     const product = await this.productRepository.findOne({ where: { title: createProductDto.title, description: createProductDto.description, category: { category_id: createProductDto.category_id } } });
    if (product) {
@@ -22,6 +28,11 @@ export class ProductService {
   return newProduct = await this.productRepository.save(newProduct);
   }
 
+  /**
+   * get all products
+   * @param category_id category id for get all products that have same category
+   * @returns products list for same category
+   */
   findAll(category_id?: number) {
     if (category_id) {
       return this.productRepository.find({ where: { category: { category_id } } });
@@ -29,6 +40,11 @@ export class ProductService {
     return this.productRepository.find();
   }
 
+  /**
+   * get one product
+   * @param id product id 
+   * @returns product from DB
+   */
   async findOne(id: number) {
     const productCache = await this.redisService.client.get(`product:${id}`);
     if (productCache) {
@@ -50,6 +66,12 @@ export class ProductService {
     return product;
   }
 
+  /**
+   * update product
+   * @param id product id
+   * @param updateProductDto body product for update
+   * @returns update product in DB
+   */
   async update(id: number, updateProductDto: UpdateProductDto) {
     const product = await this.findOne(id);
     product.title = updateProductDto.title ?? product.title;
@@ -59,6 +81,13 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
+  /**
+   * update product number
+   * @param id product id
+   * @param stock stock product
+   * @param status order stats
+   * @returns update product number in DB after order
+   */
   async stockUpdate(id: number, stock: number, status: string) {
     let product = await this.findOne(id);
     if (status===OrderStatus.DELIVERED) {

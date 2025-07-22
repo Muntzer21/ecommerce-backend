@@ -16,6 +16,7 @@ import { OrderProuctsDto } from './dto/order-products.dto';
 import { Product } from 'src/product/entities/product.entity';
 import { OrderStatus } from './enums/order-status';
 import { UpdateOrderSatus } from './dto/update-order-status.dto';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class OrderService {
@@ -25,16 +26,16 @@ export class OrderService {
     @InjectRepository(OrdersProducts)
     private readonly opReposirty: Repository<OrdersProducts>,
     private readonly productService: ProductService,
-    // @InjectRepository(Product)
-    // readonly productRepo: Repository<Product>,
-    // private dataSource: DataSource, // Inject DataSource for transactions
+    private readonly emailService : EmailService
   ) {}
-  async create(createOrderDto: CreateOrderDto, user_id: number) {
-    //  await this.orderRepository.findOne({
-    //       where: { order_id: orderSave.order_id },
-    //       relations: ['shipping_address','user'],
-    //     });
 
+  /**
+   * create a new order
+   * @param createOrderDto body of the request
+   * @param user_id user id who is creating the order
+   * @returns order in processing
+   */
+  async create(createOrderDto: CreateOrderDto, user_id: number) {
     const shipping = new Shipping();
     shipping.phone = createOrderDto.createShipping.phone;
     shipping.name = createOrderDto.createShipping.name;
@@ -46,13 +47,13 @@ export class OrderService {
     let order = new Order();
     let total = 0.0;
     order.shipping_address = shipping;
+    order.added_by = user_id;
     order = await this.orderRepository.create({
       ...order,
       user: { user_id: user_id },
     });
 
     let products_order: OrdersProducts[] = [];
-    // const productsToUpdate: Product[] = [];
 
     for (let i = 0; i < createOrderDto.orderedProducts.length; i++) {
       console.log(createOrderDto.orderedProducts.length);
@@ -81,24 +82,13 @@ export class OrderService {
         createOrderDto.orderedProducts[i].product_quantity * product.price;
       console.log(product.stock);
 
-      product.stock -= createOrderDto.orderedProducts[i].product_quantity;
-      console.log(product.stock);
-
-      await this.productService.update(
-        createOrderDto.orderedProducts[i].product_id,
-        { stock: product.stock },
-      );
-      // productsToUpdate.push(product);
       total += products_order[i].product_unit_price;
     }
 
-    // await queryRunner.manager.save(Product, productsToUpdate);
-    // here save products
     const orderSave: Order = await this.orderRepository.save({
       ...order,
       totalAmount: total,
     });
-    // products_order.orde;
     for (let product of products_order) {
       product.order = orderSave;
     }
@@ -113,10 +103,11 @@ export class OrderService {
     return this.findOne(orderSave.order_id);
   }
 
-  findAll() {
-    return `This action returns all order`;
-  }
-
+  /**
+   * to find an order by its id
+   * @param id order id
+   * @returns order object with its relations
+   */
   findOne(id: number) {
     return this.orderRepository.findOne({
       where: {
@@ -130,6 +121,13 @@ export class OrderService {
     });
   }
 
+  /**
+   * to update an order status by its id
+   * @param id order id
+   * @param updateOrderDto update order status dto
+   * @param user_id user id who is updating the order
+   * @returns updated order status
+   */
   async update(id: number, updateOrderDto: UpdateOrderSatus, user_id: number) {
     let order = await this.findOne(id);
     if (!order) throw new BadRequestException('the order is not found');
@@ -154,16 +152,20 @@ export class OrderService {
       order.deliveredAt = new Date();
 
     order.status = updateOrderDto.status;
-    // const user = await this.userService.findOne(user_id);
-    // order.updatedBy = user;
     order = await this.orderRepository.save(order);
 
     if (updateOrderDto.status === OrderStatus.DELIVERED) {
       await this.stockUpdate(order, OrderStatus.DELIVERED);
+      await this.emailService.sendEmail(order.user.email);
     }
     return order;
   }
 
+  /**
+   * to update products number
+   * @param order to get him items
+   * @param status like shipped,delevired
+   */
   async stockUpdate(order: Order, status: string) {
     for (const op of order.products) {
       await this.productService.stockUpdate(
@@ -174,6 +176,12 @@ export class OrderService {
     }
   }
 
+  /**
+   * to cancel order
+   * @param id order id to cancelled it
+   * @param user_id user that cancelled it
+   * @returns order cancelled
+   */
   async cancelled(id: number, user_id: number) {
     let order = await this.findOne(id);
     if (!order) {
@@ -194,7 +202,4 @@ export class OrderService {
     return order;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
-  }
 }

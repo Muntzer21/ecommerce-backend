@@ -11,9 +11,10 @@ import { OrdersProducts } from './entities/order.products.entity';
 import { Shipping } from './entities/shipping.entity';
 import { ProductModule } from 'src/product/product.module';
 import { Product } from 'src/product/entities/product.entity';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
-  imports: [JwtModule,UserModule,TypeOrmModule.forFeature([Order,OrdersProducts,Shipping,Product]),ProductModule], // Add your entities here if needed
+  imports: [EmailModule,JwtModule,UserModule,TypeOrmModule.forFeature([Order,OrdersProducts,Shipping,Product]),ProductModule], // Add your entities here if needed
   controllers: [OrderController],
   providers: [OrderService],
 })

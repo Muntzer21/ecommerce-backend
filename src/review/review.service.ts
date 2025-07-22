@@ -11,7 +11,13 @@ export class ReviewService {
   constructor(
     @InjectRepository(Review) private readonly reviewRepository: Repository<Review>,
     readonly redisService: RedisService,
-      ) { }
+  ) { }
+  /**
+   * add new review in product
+   * @param createReviewDto new review body
+   * @param user_id user that add this review
+   * @returns new review in DB
+   */
   async create(createReviewDto: CreateReviewDto, user_id: number) {
     const review = await this.reviewRepository.findOne({where:{product:{ product_id:createReviewDto.product_id}, user:{user_id:user_id}}});
     if (review) {
@@ -21,6 +27,11 @@ export class ReviewService {
    return await this.reviewRepository.save(newReview);
   }
 
+  /**
+   * get review about one product
+   * @param product_id product id
+   * @returns all review about this product
+   */
   findAll(product_id?: number) {
     if (product_id) {
       return this.reviewRepository.find({ where: { product: { product_id } } });
@@ -28,6 +39,11 @@ export class ReviewService {
     return this.reviewRepository.find();
   }
 
+  /**
+   * get one review 
+   * @param id review id
+   * @returns review from DB
+   */
   async findOne(id: number) {
     const reviewCache = await this.redisService.client.get(`review:${id}`);
     if (reviewCache) {
@@ -49,6 +65,12 @@ export class ReviewService {
     return review;
   }
 
+  /**
+   * update review
+   * @param id review id 
+   * @param updateReviewDto review body fro update
+   * @returns update review
+   */
   async update(id: number, updateReviewDto: UpdateReviewDto) {
     const review = await this.findOne(id);
     review.rating = updateReviewDto.rating ?? review.rating;
@@ -56,6 +78,11 @@ export class ReviewService {
     return await this.reviewRepository.save(review);
   }
 
+  /**
+   * delte review
+   * @param id review id
+   * @returns delete review
+   */
   async remove(id: number) {
     const review = await this.findOne(id);
     return await this.reviewRepository.remove(review);

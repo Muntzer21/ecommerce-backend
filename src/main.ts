@@ -22,6 +22,8 @@ async function bootstrap() {
      .setTitle('store')
      .setDescription('The Store API description')
      .setVersion('1.0')
+     .addSecurity('bearer', { type: 'http', scheme: 'bearer' })
+     .addBearerAuth()
      .build();
    const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, documentFactory);
